@@ -1,0 +1,88 @@
+.set-container .set-card { border-radius: 12px; }
+.set-container .form-control:focus, .set-container .form-select:focus {
+    border-color: #4361ee;
+    box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.1);
+}
+#print-editor {
+    border-radius: 8px;
+    line-height: 1.5;
+    color: #2d3748;
+}
+.preview-window {
+    background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+#print-preview {
+    font-family: 'Times New Roman', Times, serif;
+    color: #000;
+}
+@media (max-width: 991px) {
+    #print-preview { width: 100% !important; }
+    .set-container .d-flex { flex-direction: column; align-items: center !important; text-align: center; }
+}
+
+.set-container .card { border-radius: 12px; }
+.modal-xl { max-width: 90% !important; }
+
+/* Tùy chỉnh chiều cao CKEditor */
+#cke_print_editor_input {
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    overflow: hidden;
+}
+
+.modal-header { border-bottom: 1px solid #f1f5f9; }
+.modal-footer { border-top: 1px solid #f1f5f9; }
+.set-container .card { border-radius: 15px; }
+.modal-xl { max-width: 95% !important; }
+
+/* Tùy chỉnh khung CKEditor cho đẹp */
+#cke_print_editor_input {
+    border: none !important;
+    width: 100% !important;
+}
+
+.cke_inner { background: #fff !important; }
+.modal-body { min-height: 500px; }
+
+/* Ẩn bớt các thanh công cụ không cần thiết nếu muốn */
+.cke_bottom { display: none; }
+
+.set-container .card { border-radius: 15px; }
+.modal-xl { max-width: 90% !important; }
+
+/* Đảm bảo CKEditor chiếm hết chiều rộng modal */
+#cke_print_editor_input {
+    border: none !important;
+    width: 100% !important;
+}
+
+.modal-body { min-height: 450px; }
+
+@media print {
+    /* Loại bỏ lề mặc định của trình duyệt để máy in nhiệt in sát biên được */
+    @page {
+        margin: 0;
+    }
+    body {
+        margin: 0.5cm; /* Lề nhỏ để in A4 vẫn đẹp */
+    }
+    
+    /* Ẩn mọi thứ trừ nội dung hóa đơn */
+    nav, .sidebar, .btn, .modal-header, .modal-footer, .alert {
+        display: none !important;
+    }
+
+    /* Ép tất cả bảng và hình ảnh không được vượt quá chiều rộng giấy */
+    table, div, img {
+        max-width: 100% !important;
+        overflow: hidden;
+    }
+
+    /* Đảm bảo chữ đen rõ nét khi in */
+    * {
+        color: #000 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+}

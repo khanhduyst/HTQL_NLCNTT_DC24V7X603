@@ -1,0 +1,158 @@
+.cus-container .cus-title {
+    font-weight: 800;
+    color: #1e293b;
+}
+
+.cus-container .cus-card {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.cus-container .type-vip {
+    background-color: #fff7ed;
+    color: #c2410c;
+    border: 1px solid #ffedd5;
+}
+
+/* =========================================
+   Giao diện Mobile (VIP - Dưới 992px)
+   ========================================= */
+@media (max-width: 991.98px) {
+    /* Gom gọn header */
+    .cus-container .cus-header {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 15px;
+    }
+    .cus-container .cus-actions { width: 100%; display: flex; gap: 5px; }
+    .cus-container .cus-actions button { flex: 1; font-size: 13px; }
+
+    /* Ẩn bảng, hiện card */
+    .cus-table { display: none !important; }
+    
+    .cus-card-list {
+        display: block !important;
+        padding: 15px;
+    }
+
+    .cus-list-item {
+        background: #fff;
+        border: 1px solid #f1f5f9;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 12px;
+        transition: 0.2s;
+    }
+
+    .cus-list-item:hover {
+        background-color: #f8fafc;
+        border-color: #e2e8f0;
+    }
+
+    /* Định vị các khối thông tin */
+    .cus-item-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .cus-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 8px;
+    }
+
+    .cus-item-body {
+        margin-top: 15px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 5px;
+    }
+
+    .cus-btn-view-detail {
+        font-size: 12px;
+        padding: 5px 12px;
+        border-radius: 6px;
+    }
+}
+
+/* =========================================
+   Giao diện Desktop (Trên 992px)
+   ========================================= */
+@media (min-width: 992px) {
+    /* Hiện bảng, ẩn card */
+    .cus-card-list { display: none !important; }
+    
+    .cus-table {
+        width: 100%;
+        display: table !important;
+    }
+
+    .cus-table thead th {
+        background-color: #f8fafc;
+        color: #64748b;
+        font-size: 11px;
+        text-transform: uppercase;
+        font-weight: 700;
+        padding: 18px 15px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .cus-table tbody td {
+        padding: 15px;
+        font-size: 14px;
+        border-bottom: 1px solid #f8fafc;
+    }
+
+    .cus-avatar-table {
+        width: 35px;
+        height: 35px;
+        border-radius: 6px;
+    }
+}
+
+/* Modal Popup Chi tiết (Style image_6.png) */
+#cus-detail-modal .list-group-item {
+    border-left: 0;
+    border-right: 0;
+    border-radius: 0;
+    padding: 12px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+}
+
+#cus-detail-modal .cus-modal-label {
+    color: #64748b;
+    font-weight: 500;
+}
+
+#cus-detail-modal .cus-modal-value {
+    font-weight: 600;
+    color: #1e293b;
+    text-align: right;
+}
+
+/* Hiệu ứng rung khi có lỗi */
+.shake-effect {
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+/* Làm đẹp ô input khi bị lỗi */
+.was-validated .form-control:invalid {
+    border-color: #ff3e1d !important;
+    background-image: none !important; /* Bỏ icon dấu chấm than mặc định của browser cho sạch */
+}
+.invalid-feedback {
+    color: #ff3e1d;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}

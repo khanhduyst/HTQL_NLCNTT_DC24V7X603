@@ -1,0 +1,16 @@
+RewriteEngine On
+RewriteBase /
+
+# Nếu là file hoặc thư mục thật thì bỏ qua
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Điều hướng /login thành /login.php
+RewriteRule ^login$ login.php [L]
+
+# Điều hướng /index thành /index.php
+RewriteRule ^index$ index.php [L]
+
+# Tự động thêm đuôi .php cho các yêu cầu khác nếu file tồn tại
+RewriteCond %{REQUEST_FILENAME}\.php -f
+RewriteRule ^([^\.]+)$ $1.php [NC,L]

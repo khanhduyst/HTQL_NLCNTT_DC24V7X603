@@ -1,0 +1,150 @@
+:root {
+  --sidebar-width: 260px;
+  --primary-color: #4361ee;
+}
+
+body {
+  background-color: #f4f7fe;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  overflow-x: hidden;
+}
+
+.main-wrapper {
+  display: flex;
+}
+
+#main-sidebar {
+  width: var(--sidebar-width);
+  min-height: 100vh;
+  transition: all 0.3s;
+  flex-shrink: 0;
+}
+
+#main-sidebar.collapsed {
+  margin-left: calc(-1 * var(--sidebar-width));
+}
+
+#main-sidebar .nav-link {
+  border-radius: 10px;
+  margin: 2px 0;
+  font-size: 0.95rem;
+  padding: 12px 15px;
+  opacity: 0.7;
+}
+
+#main-sidebar .nav-link.active {
+  background-color: var(--primary-color);
+  opacity: 1;
+  box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+}
+
+#main-sidebar .nav-link:hover:not(.active) {
+  background-color: rgba(255, 255, 255, 0.1);
+  opacity: 1;
+}
+
+#main-body {
+  background-color: #f4f7fe;
+  min-height: 100vh;
+}
+
+@media (max-width: 992px) {
+  :root {
+    --sidebar-width: 0px;
+  }
+
+  #main-sidebar {
+    position: fixed;
+    z-index: 1000;
+    left: -260px;
+    height: 100vh;
+  }
+
+  #main-sidebar.show-mobile {
+    left: 0;
+    width: 260px;
+  }
+
+  #main-body {
+    width: 100% !important;
+  }
+}
+
+#main-body {
+  flex-grow: 1;
+  transition: all 0.3s;
+}
+
+.table-responsive {
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+/* Header VIP Styles */
+header.navbar {
+  z-index: 99;
+}
+
+.input-group-text,
+.form-control {
+  border-radius: 8px;
+}
+
+.dropdown-menu {
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Badge thông báo */
+.badge.rounded-pill {
+  padding: 4px 6px;
+}
+
+/* Avatar và Dropdown */
+.dropdown-item {
+  transition: all 0.2s;
+}
+
+.dropdown-item:hover {
+  background-color: #f8f9fa;
+  color: var(--primary-color) !important;
+}
+
+.bg-primary-subtle {
+  background-color: #e0e7ff !important;
+}
+.bg-success-subtle {
+  background-color: #dcfce7 !important;
+}
+
+/* Tránh avatar bị méo khi chưa có ảnh */
+img.rounded-circle {
+  object-fit: cover;
+}
+
+@media (max-width: 576px) {
+  #notification-dropdown {
+    position: fixed !important; /* Cố định vị trí */
+    top: 60px !important; /* Cách header một khoảng */
+    left: 10px !important; /* Cách lề trái 10px */
+    right: 10px !important; /* Cách lề phải 10px */
+    width: calc(100% - 20px) !important; /* Ép chiều ngang gần full màn hình */
+    transform: none !important; /* Bỏ các thuộc tính tính toán tự động của Popper.js */
+  }
+}
+
+/* Thêm hiệu ứng cho mượt */
+.dropdown-menu-end {
+  right: 0;
+  left: auto;
+}

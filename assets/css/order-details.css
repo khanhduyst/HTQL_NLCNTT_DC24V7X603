@@ -1,0 +1,22 @@
+.odt-container .odt-title { color: #1e293b; letter-spacing: -0.5px; }
+.odt-badge { font-size: 11px; padding: 5px 10px; border-radius: 6px; }
+
+.odt-container .odt-table thead th {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #64748b;
+    padding: 12px 15px;
+}
+
+.odt-container .odt-table tbody td {
+    padding: 20px 15px;
+    font-size: 14px;
+}
+
+.odt-container .card { border-radius: 12px; }
+.odt-container .odt-prod-img { font-size: 20px; }
+
+@media (max-width: 991px) {
+    .odt-container .odt-header { flex-direction: column; align-items: flex-start !important; gap: 15px; }
+    .odt-container .odt-header button { width: 100%; }
+}

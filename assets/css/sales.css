@@ -1,0 +1,296 @@
+/* Tổng thể khu vực bán hàng */
+.sales-container {
+    background-color: #f5f5f9;
+    margin: -1.5rem; /* Để tràn viền đẹp hơn */
+    padding: 1.5rem;
+}
+
+/* Danh sách sản phẩm bên trái */
+.product-item-card {
+    transition: all 0.2s ease-in-out;
+    border-radius: 12px !important;
+    overflow: hidden;
+}
+
+.product-item-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.1) !important;
+    border-color: variable(--primary-color) !important;
+}
+
+.product-img-wrapper {
+    height: 140px;
+    background-color: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.product-img-wrapper img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+}
+
+/* Giỏ hàng bên phải */
+.cart-card {
+    border-radius: 12px !important;
+    display: flex;
+    flex-grow: 1;
+}
+
+#cart-items {
+    min-height: 300px;
+}
+
+.cart-item {
+    border-bottom: 1px dashed #ebedf0;
+    transition: background 0.2s;
+}
+
+.cart-item:hover {
+    background-color: #fcfcff;
+}
+
+/* Khu vực tổng tiền */
+.sales-footer {
+    border-top: 2px solid #f5f5f9;
+}
+
+.btn-checkout {
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 10px rgba(105, 108, 255, 0.3);
+}
+
+/* Tùy chỉnh thanh cuộn cho chuyên nghiệp */
+.overflow-auto::-webkit-scrollbar {
+    width: 6px;
+}
+.overflow-auto::-webkit-scrollbar-thumb {
+    background: #dcdfe8;
+    border-radius: 10px;
+}
+
+.pos-wrapper {
+    display: flex;
+    height: calc(100vh - 80px); /* Trừ đi chiều cao header */
+    background: #f4f7fa;
+    margin: -1.5rem; /* Để tràn màn hình */
+}
+
+/* 1. Sidebar bên trái (Danh mục) */
+.pos-categories {
+    width: 80px;
+    background: white;
+    border-right: 1px solid #e1e8ed;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px 0;
+}
+.cat-item {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.cat-item:hover, .cat-item.active {
+    background: #fff0eb;
+    color: #ff6b3d;
+}
+.cat-item i { font-size: 20px; margin-bottom: 5px; }
+.cat-item span { font-size: 10px; font-weight: bold; }
+
+/* 2. Khu vực giữa (Sản phẩm) */
+.pos-content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+.product-card {
+    background: white;
+    border-radius: 15px;
+    border: none;
+    transition: 0.3s;
+    overflow: hidden;
+    position: relative;
+}
+.product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+.product-card .img-container {
+    height: 150px;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.product-card img { max-width: 80%; max-height: 80%; object-fit: contain; }
+.btn-add-cart {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: #ff6b3d;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+}
+
+/* 3. Khu vực bên phải (Hóa đơn) */
+.pos-billing {
+    width: 350px;
+    background: white;
+    border-left: 1px solid #e1e8ed;
+    display: flex;
+    flex-direction: column;
+}
+.order-id { font-weight: bold; color: #333; padding: 20px; border-bottom: 1px dashed #eee; }
+.btn-pay {
+    background: #ff6b3d;
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 10px;
+    width: 100%;
+    font-weight: bold;
+}
+
+.pos-wrapper {
+    display: flex;
+    height: calc(100vh - 65px);
+    background: #f5f5f9;
+    margin: -1.5rem;
+}
+
+/* Sidebar Trái - Giữ nguyên cấu trúc, đổi màu xanh */
+.pos-categories {
+    width: 85px;
+    background: white;
+    border-right: 1px solid #d9dee3;
+    display: flex;
+    flex-direction: column;
+    padding: 10px 0;
+}
+.cat-item {
+    width: 70px;
+    height: 70px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 5px auto;
+    border-radius: 12px;
+    cursor: pointer;
+    color: #a1acb8;
+}
+.cat-item.active {
+    background: #e7e7ff;
+    color:variable(--primary-color);;
+}
+
+/* Cột giữa - Sản phẩm */
+.pos-content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+.product-card {
+    border-radius: 12px;
+    border: 1px solid #d9dee3;
+    transition: 0.2s;
+}
+.product-card:hover { border-color: #696cff; box-shadow: 0 4px 12px rgba(105, 108, 255, 0.1); }
+.btn-add-cart {
+    background: variable(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 5px 12px;
+}
+
+/* Cột phải - Hóa đơn & Khách hàng */
+.pos-billing {
+    width: 380px;
+    background: white;
+    border-left: 1px solid #d9dee3;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Phần chọn khách hàng */
+.customer-section {
+    padding: 15px;
+    background: #f8f9fa;
+    margin: 15px;
+    border-radius: 12px;
+    border: 1px dashed #d9dee3;
+}
+.customer-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn-pay-now {
+    background: variable(--primary-color);
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 10px;
+    width: 100%;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(105, 108, 255, 0.25);
+}
+
+.pos-wrapper {
+    display: flex;
+    height: calc(100vh - 65px);
+    background: #f5f5f9;
+    margin: -1.5rem;
+}
+
+/* Cột trái - Danh sách sản phẩm (Chiếm hết phần còn lại) */
+.pos-content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+/* Cột phải - Hóa đơn & Khách hàng (Cố định chiều rộng) */
+.pos-billing {
+    width: 400px; /* Tăng nhẹ độ rộng để nhìn cho cân đối */
+    background: white;
+    border-left: 1px solid #d9dee3;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Card sản phẩm tinh chỉnh lại cho đẹp khi khung rộng */
+.product-card {
+    border-radius: 12px;
+    border: 1px solid #d9dee3;
+    transition: 0.2s;
+    background: white;
+}
+.product-card:hover { 
+    border-color: variable(--primary-color);; 
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(105, 108, 255, 0.1); 
+}
+
+/* Phần khách hàng */
+.customer-section {
+    padding: 15px;
+    background: #f0f2ff; /* Màu xanh nhạt cho đồng bộ */
+    margin: 15px;
+    border-radius: 12px;
+    border: 1px solid #e7e7ff;
+}
