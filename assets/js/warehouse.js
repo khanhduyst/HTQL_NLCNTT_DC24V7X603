@@ -1,11 +1,13 @@
 (function () {
   let products = [];
+  let isEditMode = false;
+  let currentEditSku = "";
 
   function loadProductsFromDB() {
     const area = document.getElementById("wh-content-render");
     if (!area) return;
 
-    fetch("api/get_products.php")
+    fetch("api/api_products.php")
       .then((res) => res.json())
       .then((response) => {
         if (response.status === "success") {
@@ -59,9 +61,7 @@
       return;
     }
 
-    // CƠ CHẾ KIỂM TRA VÀ TẠO GIAO DIỆN HÌNH ẢNH
     const getProductImageHTML = (p, size = 35) => {
-      // Nếu có link ảnh hợp lệ từ Cloudinary (bắt đầu bằng http hoặc https)
       if (
         p.image_url &&
         (p.image_url.startsWith("http://") ||
@@ -69,7 +69,6 @@
       ) {
         return `<img src="${p.image_url}" alt="${p.name}" class="object-fit-cover rounded shadow-sm" style="width: ${size}px; height: ${size}px; min-width: ${size}px; border: 1px solid #e3e6f0;">`;
       }
-      // Khối icon dự phòng cũ nếu không có ảnh
       return `<div class="wh-img-box text-white d-flex align-items-center justify-content-center" 
                    style="background: ${p.color || "#4361ee"}; width: ${size}px; height: ${size}px; min-width: ${size}px; font-size: ${size / 2.5}px; border-radius: 6px;">
                   ${p.icon || '<i class="fas fa-box"></i>'}
@@ -77,7 +76,6 @@
     };
 
     if (window.innerWidth <= 991.98) {
-      // Giao diện CARD trên ĐIỆN THOẠI
       area.innerHTML = `
                 <div class="wh-card-list">
                     ${products
@@ -85,7 +83,8 @@
                         (p, index) => `
                         <div class="wh-list-item shadow-sm">
                             <div class="wh-item-header">
-                                ${getProductImageHTML(p, 45)} <div class="flex-grow-1 ms-2">
+                                ${getProductImageHTML(p, 45)} 
+                                <div class="flex-grow-1 ms-2">
                                     <div class="fw-bold text-dark">${p.name}</div>
                                     <small class="text-muted">SKU: ${p.sku}</small>
                                 </div>
@@ -93,7 +92,11 @@
                             </div>
                             <div class="d-flex justify-content-between align-items-center mt-3">
                                 <span class="fw-bold text-primary">${p.price} đ</span>
-                                <button class="btn btn-light btn-sm rounded-pill px-3 border" onclick="showWhDetail(${index})">Chi tiết</button>
+                                <div class="d-flex gap-1">
+                                    <button class="btn btn-light btn-sm rounded-pill px-2.5 border" onclick="showWhDetail(${index})"><i class="fas fa-eye text-dark"></i></button>
+                                    <button class="btn btn-light btn-sm rounded-pill px-2.5 border text-primary" onclick="openEditWarehouse(${index})"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-light btn-sm rounded-pill px-2.5 border text-danger" onclick="deleteWarehouseItem(${index})"><i class="fas fa-trash"></i></button>
+                                </div>
                             </div>
                         </div>
                     `,
@@ -102,7 +105,6 @@
                 </div>
             `;
     } else {
-      // Giao diện BẢNG trên MÁY TÍNH
       area.innerHTML = `
                 <table class="table table-hover align-middle mb-0 wh-table">
                     <thead>
@@ -123,7 +125,8 @@
                             <tr>
                                 <td class="ps-4">
                                     <div class="d-flex align-items-center">
-                                        ${getProductImageHTML(p, 38)} <div class="fw-bold text-dark ms-3">${p.name}</div>
+                                        ${getProductImageHTML(p, 38)} 
+                                        <div class="fw-bold text-dark ms-3">${p.name}</div>
                                     </div>
                                 </td>
                                 <td><code class="text-pink fw-bold" style="color: #d63384;">${p.sku}</code></td>
@@ -132,8 +135,9 @@
                                 <td class="fw-bold">${p.stock}</td>
                                 <td><span class="wh-badge stock-${p.status}">${p.label}</span></td>
                                 <td class="text-end pe-4">
-                                    <button class="btn btn-light btn-sm rounded-circle me-1" onclick="showWhDetail(${index})"><i class="fas fa-eye text-dark"></i></button>
-                                    <button class="btn btn-light btn-sm rounded-circle text-danger"><i class="fas fa-trash"></i></button>
+                                    <button class="btn btn-light btn-sm rounded-circle me-1" onclick="showWhDetail(${index})" title="Xem chi tiết"><i class="fas fa-eye text-dark"></i></button>
+                                    <button class="btn btn-light btn-sm rounded-circle me-1 text-primary" onclick="openEditWarehouse(${index})" title="Chỉnh sửa"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-light btn-sm rounded-circle text-danger" onclick="deleteWarehouseItem(${index})" title="Xóa"><i class="fas fa-trash"></i></button>
                                 </td>
                             </tr>
                         `,
@@ -168,12 +172,149 @@
         `;
   }
 
+  window.openEditWarehouse = function (index) {
+    const p = products[index];
+    isEditMode = true;
+    currentEditSku = p.sku;
+
+    const modalTitle = document.querySelector(
+      "#modalAddWarehouse .modal-title",
+    );
+    const btnSubmit = document.querySelector(
+      "#form-add-warehouse button[type='submit']",
+    );
+
+    if (modalTitle)
+      modalTitle.innerHTML =
+        '<i class="fas fa-edit me-2"></i> Cập Nhật Thông Tin Hàng Hóa';
+    if (btnSubmit)
+      btnSubmit.innerHTML = '<i class="fas fa-save me-1"></i> Lưu thay đổi';
+
+    document.getElementById("wh-add-name").value = p.name;
+    document.getElementById("wh-sku").value = p.sku;
+    document.getElementById("wh-sku").disabled = true;
+    document.getElementById("wh-add-brand").value = p.brand || "";
+    document.getElementById("wh-add-quantity").value = p.stock;
+    document.getElementById("wh-add-unit").value = p.unit || "Cái";
+    document.getElementById("wh-add-min-alert").value = p.min_alert || 5;
+    document.getElementById("wh-add-location").value = p.location || "";
+    document.getElementById("wh-add-mfg-date").value = p.mfg_date || "";
+    document.getElementById("wh-add-exp-date").value = p.exp_date || "";
+
+    const specInput = document.getElementById("wh-add-specification");
+    if (specInput) {
+      specInput.value = p.specification || "";
+    }
+
+    const rawPriceIn = p.price ? p.price.replace(/\./g, "") : 0;
+    document.getElementById("wh-add-price-in").value = rawPriceIn;
+    document.getElementById("wh-add-price-out").value = p.price_out || 0;
+    document.getElementById("wh-add-note").value = p.description || "";
+
+    const selectCat = document.getElementById("wh-add-category");
+    if (selectCat) {
+      for (let option of selectCat.options) {
+        if (option.text === p.cat) {
+          selectCat.value = option.value;
+          break;
+        }
+      }
+    }
+
+    const whModalEl = document.getElementById("modalAddWarehouse");
+    const modalInstance =
+      bootstrap.Modal.getInstance(whModalEl) || new bootstrap.Modal(whModalEl);
+    modalInstance.show();
+  };
+
+  window.deleteWarehouseItem = function (index) {
+    const p = products[index];
+    Swal.fire({
+      title: "Xác nhận xóa hàng hóa?",
+      text: `Sản phẩm [${p.sku}] - ${p.name} sẽ bị rút khỏi danh mục hiển thị, dữ liệu kho cũ vẫn được lưu trữ bảo mật.`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText: "Đúng vậy, xóa nó!",
+      cancelButtonText: "Hủy thao tác",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch("api/api_products.php", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sku: p.sku }),
+        })
+          .then((res) => res.json())
+          .then((response) => {
+            if (response.status === "success") {
+              Swal.fire({
+                icon: "success",
+                title: "Đã xóa mềm thành công!",
+                text: "Hệ thống đã ẩn sản phẩm và cập nhật lịch sử hệ thống.",
+                confirmButtonColor: "#4361ee",
+              }).then(() => {
+                location.reload();
+              });
+            } else {
+              Swal.fire("Lỗi!", response.message, "error");
+            }
+          })
+          .catch((err) => {
+            Swal.fire("Lỗi!", "Không thể kết nối đến máy chủ API!", "error");
+          });
+      }
+    });
+  };
+
+  const whModalEl = document.getElementById("modalAddWarehouse");
+  if (whModalEl) {
+    whModalEl.addEventListener("hidden.bs.modal", function () {
+      isEditMode = false;
+      currentEditSku = "";
+      document.getElementById("wh-sku").disabled = false;
+      const modalTitle = document.querySelector(
+        "#modalAddWarehouse .modal-title",
+      );
+      const btnSubmit = document.querySelector(
+        "#form-add-warehouse button[type='submit']",
+      );
+      if (modalTitle)
+        modalTitle.innerHTML =
+          '<i class="fas fa-boxes me-2"></i> Khởi Tạo & Nhập Kho Hàng Hóa';
+      if (btnSubmit)
+        btnSubmit.innerHTML =
+          '<i class="fas fa-save me-1"></i> Xác nhận nhập kho';
+    });
+
+    whModalEl.addEventListener("show.bs.modal", function (e) {
+      if (isEditMode) return;
+
+      const form = document.getElementById("form-add-warehouse");
+      if (form) {
+        form.reset();
+        form.classList.remove("was-validated");
+      }
+
+      const skuInput = document.getElementById("wh-sku");
+      if (skuInput) skuInput.disabled = false;
+
+      const specInput = document.getElementById("wh-add-specification");
+      if (specInput) specInput.value = "";
+
+      const noteInput = document.getElementById("wh-add-note");
+      if (noteInput) noteInput.value = "";
+
+      const locInput = document.getElementById("wh-add-location");
+      if (locInput) locInput.value = "";
+    });
+  }
+
   window.showWhDetail = function (index) {
     const p = products[index];
     const modalBody = document.getElementById("wh-modal-body");
     if (!modalBody) return;
 
-    // Xử lý ảnh Cloudinary tràn viền, có overlay nghệ thuật
     const imgHTML =
       p.image_url &&
       (p.image_url.startsWith("http://") || p.image_url.startsWith("https://"))
@@ -192,11 +333,34 @@
               <h4 class="fw-bold text-white mb-0 mt-1">${p.name}</h4>
          </div>`;
 
-    // Chuẩn hóa dữ liệu văn bản
+    let mfgText = "-- / -- / ----";
+    if (p.mfg_date && p.mfg_date !== "0000-00-00") {
+      const d = new Date(p.mfg_date);
+      if (!isNaN(d.getTime())) {
+        mfgText =
+          d.getDate().toString().padStart(2, "0") +
+          "-" +
+          (d.getMonth() + 1).toString().padStart(2, "0") +
+          "-" +
+          d.getFullYear();
+      }
+    }
+
+    let expText = "-- / -- / ----";
+    if (p.exp_date && p.exp_date !== "0000-00-00") {
+      const d = new Date(p.exp_date);
+      if (!isNaN(d.getTime())) {
+        expText =
+          d.getDate().toString().padStart(2, "0") +
+          "-" +
+          (d.getMonth() + 1).toString().padStart(2, "0") +
+          "-" +
+          d.getFullYear();
+      }
+    }
+
     const brandText = p.brand ? p.brand : "Chưa gắn thương hiệu";
     const locationText = p.location ? p.location : "Chưa xếp kệ hàng";
-    const mfgText = p.mfg_date ? p.mfg_date : "-- / -- / ----";
-    const expText = p.exp_date ? p.exp_date : "-- / -- / ----";
     const descText = p.description
       ? p.description
       : "Không có ghi chú lưu kho cho đợt nhập hàng này.";
@@ -242,7 +406,13 @@
                   <div class="col-6">
                       <div class="p-3 rounded-3 h-100" style="background-color: #fef2f2;">
                           <small class="text-danger d-block mb-1 font-monospace text-uppercase fw-bold" style="font-size: 10px; letter-spacing: 0.5px;">Giá niêm yết bán</small>
-                          <span class="fw-extrabold text-danger d-block" style="font-size: 18px; letter-spacing: -0.5px;">${p.price_out ? number_format(p.price_out, 0, ",", ".") : p.price} <small style="font-size: 12px;">đ</small></span>
+                          <span class="fw-extrabold text-danger d-block" style="font-size: 18px; letter-spacing: -0.5px;">${p.price_out ? Number(p.price_out).toLocaleString("vi-VN") : p.price} <small style="font-size: 12px;">đ</small></span>
+                      </div>
+                  </div>
+                  <div class="col-12">
+                      <div class="p-2.5 bg-light rounded-3 border-0 text-center" style="background-color: #eef2ff !important;">
+                          <small class="text-muted d-block mb-0.5" style="font-size: 11px;">Quy cách / Dung tích hàng hóa</small>
+                          <span class="fw-bold text-indigo small" style="color: #4f46e5;"><i class="fas fa-info-circle me-1"></i> ${p.specification ? p.specification : "Chưa cập nhật thông số"}</span>
                       </div>
                   </div>
                   <div class="col-6">
@@ -289,6 +459,130 @@
   loadProductsFromDB();
   loadCategoriesFromDB();
   window.onresize = renderWarehouse;
+
+  const whForm = document.getElementById("form-add-warehouse");
+  if (whForm && whModalEl) {
+    const btnSubmit = whForm.querySelector('button[type="submit"]');
+    const inputSku = document.getElementById("wh-sku");
+    const btnGenSku = document.getElementById("btn-wh-gen-sku");
+    const originalText = btnSubmit.innerHTML;
+
+    if (btnGenSku) {
+      btnGenSku.onclick = function () {
+        const random = Math.floor(10000 + Math.random() * 90000);
+        inputSku.value = "WH-" + random;
+        inputSku.classList.add("is-valid");
+        setTimeout(() => inputSku.classList.remove("is-valid"), 500);
+      };
+    }
+
+    whForm.onsubmit = async function (e) {
+      e.preventDefault();
+
+      if (!whForm.checkValidity()) {
+        e.stopPropagation();
+        whForm.classList.add("was-validated");
+        return;
+      }
+
+      btnSubmit.disabled = true;
+      btnSubmit.innerHTML =
+        '<span class="spinner-border spinner-border-sm me-2"></span> Đang xử lý...';
+
+      let finalImageUrl = "default.png";
+      const imageInput = document.getElementById("wh-add-image");
+
+      if (isEditMode) {
+        const currentProduct = products.find((p) => p.sku === currentEditSku);
+        if (currentProduct && currentProduct.image_url) {
+          finalImageUrl = currentProduct.image_url;
+        }
+      }
+
+      if (imageInput && imageInput.files.length > 0) {
+        try {
+          const cloudName = "dnjbvgejr";
+          const uploadPreset = "htql_upload";
+
+          const clData = new FormData();
+          clData.append("file", imageInput.files[0]);
+          clData.append("upload_preset", uploadPreset);
+
+          const clRes = await fetch(
+            `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+            {
+              method: "POST",
+              body: clData,
+            },
+          );
+
+          const clJson = await clRes.json();
+          if (clJson.secure_url) {
+            finalImageUrl = clJson.secure_url;
+          }
+        } catch (clErr) {
+          console.error("Lỗi upload Cloudinary:", clErr);
+        }
+      }
+
+      const productData = {
+        name: document.getElementById("wh-add-name").value,
+        sku: document.getElementById("wh-sku").value,
+        category_id: document.getElementById("wh-add-category").value,
+        brand: document.getElementById("wh-add-brand").value,
+        stock: document.getElementById("wh-add-quantity").value,
+        unit: document.getElementById("wh-add-unit").value,
+        min_alert: document.getElementById("wh-add-min-alert").value,
+        location: document.getElementById("wh-add-location").value,
+        mfg_date: document.getElementById("wh-add-mfg-date").value,
+        exp_date: document.getElementById("wh-add-exp-date").value,
+        price_in: document.getElementById("wh-add-price-in").value || 0,
+        price_out: document.getElementById("wh-add-price-out").value || 0,
+        description: document.getElementById("wh-add-note").value,
+        specification: document.getElementById("wh-add-specification")
+          ? document.getElementById("wh-add-specification").value
+          : "",
+        image_url: finalImageUrl,
+      };
+
+      fetch("api/api_products.php", {
+        method: isEditMode ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(productData),
+      })
+        .then((res) => res.json())
+        .then((response) => {
+          if (response.status === "success") {
+            btnSubmit.innerHTML = '<i class="fas fa-check me-2"></i> Đã xong!';
+            btnSubmit.classList.replace("btn-primary", "btn-success");
+
+            const modalInstance = bootstrap.Modal.getInstance(whModalEl);
+            if (modalInstance) modalInstance.hide();
+
+            Swal.fire({
+              icon: "success",
+              title: isEditMode
+                ? "Cập nhật thành công!"
+                : "Nhập kho thành công!",
+              text: "Sản phẩm đã được cập nhật hệ thống.",
+              confirmButtonText: "Tuyệt vời",
+              confirmButtonColor: "#4361ee",
+            }).then(() => {
+              location.reload();
+            });
+          } else {
+            btnSubmit.innerHTML = originalText;
+            btnSubmit.disabled = false;
+            Swal.fire("Lỗi!", response.message, "error");
+          }
+        })
+        .catch((err) => {
+          btnSubmit.innerHTML = originalText;
+          btnSubmit.disabled = false;
+          Swal.fire("Lỗi!", "Không thể kết nối đến máy chủ API!", "error");
+        });
+    };
+  }
 })();
 
 window.closeQuickCategoryModal = function () {
@@ -349,131 +643,7 @@ window.submitQuickCategory = function () {
       }
     })
     .catch((err) => {
-      console.error("Lỗi kết nối gốc:", err);
+      console.log("Lỗi kết nối gốc:", err);
       Swal.fire("Lỗi!", "Không thể kết nối đến máy chủ API!", "error");
     });
 };
-
-(function () {
-  const whForm = document.getElementById("form-add-warehouse");
-  const whModal = document.getElementById("modalAddWarehouse");
-  const btnGenSku = document.getElementById("btn-wh-gen-sku");
-  const inputSku = document.getElementById("wh-sku");
-  const btnSubmit = whForm?.querySelector('button[type="submit"]');
-
-  if (whForm && whModal) {
-    const originalText = btnSubmit.innerHTML;
-
-    if (btnGenSku) {
-      btnGenSku.onclick = function () {
-        const random = Math.floor(10000 + Math.random() * 90000);
-        inputSku.value = "WH-" + random;
-        inputSku.classList.add("is-valid");
-        setTimeout(() => inputSku.classList.remove("is-valid"), 500);
-      };
-    }
-
-    whForm.onsubmit = async function (e) {
-      e.preventDefault();
-
-      if (!whForm.checkValidity()) {
-        e.stopPropagation();
-        whForm.classList.add("was-validated");
-        return;
-      }
-
-      btnSubmit.disabled = true;
-      btnSubmit.innerHTML =
-        '<span class="spinner-border spinner-border-sm me-2"></span> Đang xử lý ảnh & nạp kho...';
-
-      let finalImageUrl = "default.png";
-      const imageInput = document.getElementById("wh-add-image");
-
-      if (imageInput && imageInput.files.length > 0) {
-        try {
-          const cloudName = "dnjbvgejr";
-          const uploadPreset = "htql_upload";
-
-          const clData = new FormData();
-          clData.append("file", imageInput.files[0]);
-          clData.append("upload_preset", uploadPreset);
-
-          const clRes = await fetch(
-            `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-            {
-              method: "POST",
-              body: clData,
-            },
-          );
-
-          const clJson = await clRes.json();
-          if (clJson.secure_url) {
-            finalImageUrl = clJson.secure_url;
-          }
-        } catch (clErr) {
-          console.error("Lỗi upload Cloudinary:", clErr);
-        }
-      }
-
-      const productData = {
-        name: document.getElementById("wh-add-name").value,
-        sku: document.getElementById("wh-sku").value,
-        category_id: document.getElementById("wh-add-category").value,
-        brand: document.getElementById("wh-add-brand").value,
-        stock: document.getElementById("wh-add-quantity").value,
-        unit: document.getElementById("wh-add-unit").value,
-        min_alert: document.getElementById("wh-add-min-alert").value,
-        location: document.getElementById("wh-add-location").value,
-        mfg_date: document.getElementById("wh-add-mfg-date").value,
-        exp_date: document.getElementById("wh-add-exp-date").value,
-        price_in: document.getElementById("wh-add-price-in").value || 0,
-        price_out: document.getElementById("wh-add-price-out").value || 0,
-        description: document.getElementById("wh-add-note").value,
-        image_url: finalImageUrl, // Gửi link ảnh Cloudinary đi
-      };
-
-      fetch("api/api_products.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(productData),
-      })
-        .then((res) => res.json())
-        .then((response) => {
-          if (response.status === "success") {
-            btnSubmit.innerHTML = '<i class="fas fa-check me-2"></i> Đã xong!';
-            btnSubmit.classList.replace("btn-primary", "btn-success");
-
-            const modalInstance = bootstrap.Modal.getInstance(whModal);
-            if (modalInstance) modalInstance.hide();
-
-            Swal.fire({
-              icon: "success",
-              title: "Nhập kho thành công!",
-              text: "Sản phẩm đã được cập nhật.",
-              confirmButtonText: "Tuyệt vời",
-              confirmButtonColor: "#4361ee",
-            }).then(() => {
-              location.reload();
-            });
-          } else {
-            btnSubmit.innerHTML = originalText;
-            btnSubmit.disabled = false;
-            Swal.fire("Lỗi!", response.message, "error");
-          }
-        })
-        .catch((err) => {
-          btnSubmit.innerHTML = originalText;
-          btnSubmit.disabled = false;
-          Swal.fire("Lỗi!", "Không thể kết nối đến máy chủ API!", "error");
-        });
-    };
-
-    whModal.addEventListener("hidden.bs.modal", function () {
-      whForm.classList.remove("was-validated");
-      btnSubmit.innerHTML = originalText;
-      btnSubmit.classList.replace("btn-success", "btn-primary");
-      btnSubmit.disabled = false;
-      whForm.reset();
-    });
-  }
-})();

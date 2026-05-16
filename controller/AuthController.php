@@ -15,17 +15,14 @@ class AuthController
         if (!$user) {
             return ["status" => "error", "message" => "Tài khoản không tồn tại!"];
         }
-
-        // Kiểm tra mật khẩu
+    
         if (password_verify(trim($password), trim($user['password']))) {
             if (session_status() === PHP_SESSION_NONE) {
                 session_start();
             }
-
-            // LƯU ĐẦY ĐỦ THÔNG TIN VÀO SESSION Ở ĐÂY
             $_SESSION['user_id'] = $user['id'];
-            $_SESSION['fullname'] = $user['fullname']; // Để hiện tên trên header
-            $_SESSION['role'] = $user['role'] ?? 'nhanvien'; // Để hiện chức vụ
+            $_SESSION['fullname'] = $user['fullname']; 
+            $_SESSION['role'] = $user['role'] ?? 'nhanvien'; 
 
             return ["status" => "success", "user_data" => $user];
         } else {
