@@ -1,6 +1,8 @@
 .wh-container .wh-title { font-weight: 800; }
 .wh-container .wh-card { border-radius: 15px; }
-
+.swal2-container {
+    z-index: 99999 !important;
+}
 /* Desktop Table */
 @media (min-width: 992px) {
     .wh-card-list { display: none !important; }
