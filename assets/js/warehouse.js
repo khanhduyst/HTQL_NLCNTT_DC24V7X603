@@ -30,8 +30,12 @@
           const filterSelect = document.getElementById("wh-category-filter");
           const addSelect = document.getElementById("wh-add-category");
 
-          if (filterSelect) filterSelect.innerHTML = '<option value="">Tất cả danh mục</option>';
-          if (addSelect) addSelect.innerHTML = '<option value="">-- Chọn danh mục --</option>';
+          if (filterSelect)
+            filterSelect.innerHTML =
+              '<option value="">Tất cả danh mục</option>';
+          if (addSelect)
+            addSelect.innerHTML =
+              '<option value="">-- Chọn danh mục --</option>';
 
           response.data.forEach((cat) => {
             if (filterSelect) {
@@ -55,7 +59,25 @@
       return;
     }
 
+    // CƠ CHẾ KIỂM TRA VÀ TẠO GIAO DIỆN HÌNH ẢNH
+    const getProductImageHTML = (p, size = 35) => {
+      // Nếu có link ảnh hợp lệ từ Cloudinary (bắt đầu bằng http hoặc https)
+      if (
+        p.image_url &&
+        (p.image_url.startsWith("http://") ||
+          p.image_url.startsWith("https://"))
+      ) {
+        return `<img src="${p.image_url}" alt="${p.name}" class="object-fit-cover rounded shadow-sm" style="width: ${size}px; height: ${size}px; min-width: ${size}px; border: 1px solid #e3e6f0;">`;
+      }
+      // Khối icon dự phòng cũ nếu không có ảnh
+      return `<div class="wh-img-box text-white d-flex align-items-center justify-content-center" 
+                   style="background: ${p.color || "#4361ee"}; width: ${size}px; height: ${size}px; min-width: ${size}px; font-size: ${size / 2.5}px; border-radius: 6px;">
+                  ${p.icon || '<i class="fas fa-box"></i>'}
+              </div>`;
+    };
+
     if (window.innerWidth <= 991.98) {
+      // Giao diện CARD trên ĐIỆN THOẠI
       area.innerHTML = `
                 <div class="wh-card-list">
                     ${products
@@ -63,10 +85,7 @@
                         (p, index) => `
                         <div class="wh-list-item shadow-sm">
                             <div class="wh-item-header">
-                                <div class="wh-img-box text-white d-flex align-items-center justify-content-center rounded" style="background: ${p.color}; width: 45px; height: 45px; min-width: 45px;">
-                                    ${p.icon}
-                                </div>
-                                <div class="flex-grow-1 ms-2">
+                                ${getProductImageHTML(p, 45)} <div class="flex-grow-1 ms-2">
                                     <div class="fw-bold text-dark">${p.name}</div>
                                     <small class="text-muted">SKU: ${p.sku}</small>
                                 </div>
@@ -83,6 +102,7 @@
                 </div>
             `;
     } else {
+      // Giao diện BẢNG trên MÁY TÍNH
       area.innerHTML = `
                 <table class="table table-hover align-middle mb-0 wh-table">
                     <thead>
@@ -103,11 +123,7 @@
                             <tr>
                                 <td class="ps-4">
                                     <div class="d-flex align-items-center">
-                                        <div class="wh-img-box me-3 text-white d-flex align-items-center justify-content-center" 
-                                             style="background: ${p.color}; width: 35px; height: 35px; min-width: 35px; font-size: 14px; border-radius: 6px;">
-                                            ${p.icon}
-                                        </div>
-                                        <div class="fw-bold text-dark">${p.name}</div>
+                                        ${getProductImageHTML(p, 38)} <div class="fw-bold text-dark ms-3">${p.name}</div>
                                     </div>
                                 </td>
                                 <td><code class="text-pink fw-bold" style="color: #d63384;">${p.sku}</code></td>
@@ -155,41 +171,118 @@
   window.showWhDetail = function (index) {
     const p = products[index];
     const modalBody = document.getElementById("wh-modal-body");
+    if (!modalBody) return;
+
+    // Xử lý ảnh Cloudinary tràn viền, có overlay nghệ thuật
+    const imgHTML =
+      p.image_url &&
+      (p.image_url.startsWith("http://") || p.image_url.startsWith("https://"))
+        ? `<div class="position-relative overflow-hidden rounded-3 shadow-sm" style="height: 100%; min-height: 260px;">
+            <img src="${p.image_url}" alt="${p.name}" class="w-100 h-100 object-fit-cover position-absolute top-0 start-0">
+            <div class="position-absolute top-0 start-0 w-100 h-100" style="background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,0.75) 100%);"></div>
+            <div class="position-absolute bottom-0 start-0 p-3 text-start w-100">
+                <span class="badge bg-blur text-white mb-2 fw-bold tracking-wider" style="backdrop-filter: blur(8px); background: rgba(255,255,255,0.2); font-size: 11px; letter-spacing: 0.5px;">${p.sku}</span>
+                <h4 class="fw-bold text-white mb-0" style="letter-spacing: -0.5px;">${p.name}</h4>
+            </div>
+         </div>`
+        : `<div class="w-100 rounded-3 d-flex flex-column align-items-center justify-content-center text-white p-4 shadow-sm" 
+              style="background: linear-gradient(135deg, ${p.color || "#4361ee"} 0%, #2b3a8a 100%); min-height: 260px;">
+              <span class="mb-3" style="font-size: 64px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));">${p.icon || "📦"}</span>
+              <span class="badge bg-white text-dark mb-1 fw-bold">${p.sku}</span>
+              <h4 class="fw-bold text-white mb-0 mt-1">${p.name}</h4>
+         </div>`;
+
+    // Chuẩn hóa dữ liệu văn bản
+    const brandText = p.brand ? p.brand : "Chưa gắn thương hiệu";
+    const locationText = p.location ? p.location : "Chưa xếp kệ hàng";
+    const mfgText = p.mfg_date ? p.mfg_date : "-- / -- / ----";
+    const expText = p.exp_date ? p.exp_date : "-- / -- / ----";
+    const descText = p.description
+      ? p.description
+      : "Không có ghi chú lưu kho cho đợt nhập hàng này.";
+
     modalBody.innerHTML = `
-            <div class="text-center mb-4">
-                <div class="wh-img-box mx-auto mb-3 d-flex align-items-center justify-content-center text-white shadow-sm" 
-                     style="background: ${p.color}; width: 70px; height: 70px; border-radius: 12px; font-size: 30px;">
-                    ${p.icon}
-                </div>
-                <h5 class="fw-bold mb-1 text-dark">${p.name}</h5>
-                <span class="badge bg-light text-primary border">${p.sku}</span>
-            </div>
-            <ul class="list-group list-group-flush border-top">
-                <li class="list-group-item d-flex justify-content-between py-3 small">
-                    <span class="text-muted">Loại sản phẩm:</span>
-                    <span class="fw-bold text-dark">${p.cat}</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between py-3 small">
-                    <span class="text-muted">Giá nhập kho:</span>
-                    <span class="fw-bold text-primary">${p.price} đ</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between py-3 small">
-                    <span class="text-muted">Số lượng tồn:</span>
-                    <span class="fw-bold text-dark">${p.stock} cái</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between py-3 small border-0">
-                    <span class="text-muted">Trạng thái:</span>
-                    <span class="wh-badge stock-${p.status}">${p.label}</span>
-                </li>
-            </ul>
-            <div class="d-grid mt-2">
-                <button type="button" class="btn btn-primary rounded-pill py-2" data-bs-dismiss="modal">Đóng</button>
-            </div>
-        `;
-    new bootstrap.Modal(document.getElementById("wh-detail-modal")).show();
+      <div class="row g-4 text-start">
+          <div class="col-md-5 d-flex flex-column justify-content-between">
+              ${imgHTML}
+          </div>
+
+          <div class="col-md-7">
+              <div class="row g-2">
+                  <div class="col-6">
+                      <div class="p-3 bg-light rounded-3 border-0 h-100" style="background-color: #f8f9fa !important;">
+                          <small class="text-muted d-block mb-1 font-monospace text-uppercase" style="font-size: 10px; letter-spacing: 0.5px;">Phân loại danh mục</small>
+                          <span class="fw-bold text-dark d-block"><i class="fas fa-tag me-1.5 text-secondary small"></i> ${p.cat}</span>
+                      </div>
+                  </div>
+                  <div class="col-6">
+                      <div class="p-3 bg-light rounded-3 border-0 h-100" style="background-color: #f8f9fa !important;">
+                          <small class="text-muted d-block mb-1 font-monospace text-uppercase" style="font-size: 10px; letter-spacing: 0.5px;">Hãng / Thương hiệu</small>
+                          <span class="fw-bold text-primary d-block"><i class="fas fa-copyright me-1.5 text-primary small"></i> ${brandText}</span>
+                      </div>
+                  </div>
+                  <div class="col-6">
+                      <div class="p-3 bg-light rounded-3 border-0 h-100" style="background-color: #f8f9fa !important;">
+                          <small class="text-muted d-block mb-1 font-monospace text-uppercase" style="font-size: 10px; letter-spacing: 0.5px;">Số lượng hiện tồn</small>
+                          <span class="fw-bold text-dark d-block" style="font-size: 16px;"><i class="fas fa-layer-group me-1.5 text-secondary small"></i> ${p.stock} <span class="fw-normal text-muted small">${p.unit || "Cái"}</span></span>
+                      </div>
+                  </div>
+                  <div class="col-6">
+                      <div class="p-3 bg-light rounded-3 border-0 h-100" style="background-color: #f8f9fa !important;">
+                          <small class="text-muted d-block mb-1 font-monospace text-uppercase" style="font-size: 10px; letter-spacing: 0.5px;">Vị trí định vị kho</small>
+                          <span class="fw-bold text-dark d-block"><i class="fas fa-map-marker-alt me-1.5 text-danger small"></i> ${locationText}</span>
+                      </div>
+                  </div>
+                  <div class="col-6">
+                      <div class="p-3 rounded-3 h-100" style="background-color: #f0fdf4;">
+                          <small class="text-success d-block mb-1 font-monospace text-uppercase fw-bold" style="font-size: 10px; letter-spacing: 0.5px;">Giá vốn nhập vào</small>
+                          <span class="fw-extrabold text-success d-block" style="font-size: 18px; letter-spacing: -0.5px;">${p.price} <small style="font-size: 12px;">đ</small></span>
+                      </div>
+                  </div>
+                  <div class="col-6">
+                      <div class="p-3 rounded-3 h-100" style="background-color: #fef2f2;">
+                          <small class="text-danger d-block mb-1 font-monospace text-uppercase fw-bold" style="font-size: 10px; letter-spacing: 0.5px;">Giá niêm yết bán</small>
+                          <span class="fw-extrabold text-danger d-block" style="font-size: 18px; letter-spacing: -0.5px;">${p.price_out ? number_format(p.price_out, 0, ",", ".") : p.price} <small style="font-size: 12px;">đ</small></span>
+                      </div>
+                  </div>
+                  <div class="col-6">
+                      <div class="p-2.5 bg-light rounded-3 border-0 text-center" style="background-color: #fdfaf2 !important;">
+                          <small class="text-muted d-block mb-0.5" style="font-size: 11px;">Ngày sản xuất (NSX)</small>
+                          <span class="fw-bold text-dark small"><i class="far fa-calendar-alt me-1 text-warning"></i> ${mfgText}</span>
+                      </div>
+                  </div>
+                  <div class="col-6">
+                      <div class="p-2.5 bg-light rounded-3 border-0 text-center" style="background-color: #fff5f5 !important;">
+                          <small class="text-muted d-block mb-0.5" style="font-size: 11px;">Hạn sử dụng (HSD)</small>
+                          <span class="fw-bold text-danger small"><i class="far fa-calendar-times me-1 text-danger"></i> ${expText}</span>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          
+          <div class="col-12 mt-3">
+              <div class="p-3 rounded-3 border-0" style="background: rgba(241, 245, 249, 0.6); backdrop-filter: blur(4px);">
+                  <span class="text-dark fw-bold small d-flex align-items-center mb-1.5"><i class="fas fa-comment-alt-lines me-2 text-primary"></i> Nhật ký & Ghi chú đợt nhập hàng:</span>
+                  <p class="text-muted mb-0 small" style="line-height: 1.5; font-style: italic;">"${descText}"</p>
+              </div>
+          </div>
+      </div>
+      
+      <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+          <div>
+             <span class="badge text-uppercase tracking-wider px-2.5 py-1.5 stock-${p.status}" style="font-size: 10px;">${p.label}</span>
+          </div>
+          <button type="button" class="btn btn-dark rounded-pill px-4 btn-sm shadow-none" data-bs-dismiss="modal" style="font-size: 12px; font-weight: 600; background-color: #111827;">Đóng cửa sổ</button>
+      </div>
+    `;
+
+    const modalEl = document.getElementById("wh-detail-modal");
+    const modalInstance =
+      bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+    modalInstance.show();
   };
 
-  window.triggerReloadCategories = function() {
+  window.triggerReloadCategories = function () {
     loadCategoriesFromDB();
   };
 
@@ -247,7 +340,11 @@ window.submitQuickCategory = function () {
           }
         } else {
           console.error("Chi tiết chuỗi lỗi trả về:", text);
-          Swal.fire("Lỗi xử lý JSON!", "Backend trả về dữ liệu không chuẩn mã hóa.", "error");
+          Swal.fire(
+            "Lỗi xử lý JSON!",
+            "Backend trả về dữ liệu không chuẩn mã hóa.",
+            "error",
+          );
         }
       }
     })
@@ -276,7 +373,7 @@ window.submitQuickCategory = function () {
       };
     }
 
-    whForm.onsubmit = function (e) {
+    whForm.onsubmit = async function (e) {
       e.preventDefault();
 
       if (!whForm.checkValidity()) {
@@ -286,74 +383,82 @@ window.submitQuickCategory = function () {
       }
 
       btnSubmit.disabled = true;
-      btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang nạp kho...';
+      btnSubmit.innerHTML =
+        '<span class="spinner-border spinner-border-sm me-2"></span> Đang xử lý ảnh & nạp kho...';
+
+      let finalImageUrl = "default.png";
+      const imageInput = document.getElementById("wh-add-image");
+
+      if (imageInput && imageInput.files.length > 0) {
+        try {
+          const cloudName = "dnjbvgejr";
+          const uploadPreset = "htql_upload";
+
+          const clData = new FormData();
+          clData.append("file", imageInput.files[0]);
+          clData.append("upload_preset", uploadPreset);
+
+          const clRes = await fetch(
+            `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+            {
+              method: "POST",
+              body: clData,
+            },
+          );
+
+          const clJson = await clRes.json();
+          if (clJson.secure_url) {
+            finalImageUrl = clJson.secure_url;
+          }
+        } catch (clErr) {
+          console.error("Lỗi upload Cloudinary:", clErr);
+        }
+      }
 
       const productData = {
         name: document.getElementById("wh-add-name").value,
         sku: document.getElementById("wh-sku").value,
         category_id: document.getElementById("wh-add-category").value,
+        brand: document.getElementById("wh-add-brand").value,
         stock: document.getElementById("wh-add-quantity").value,
+        unit: document.getElementById("wh-add-unit").value,
+        min_alert: document.getElementById("wh-add-min-alert").value,
         location: document.getElementById("wh-add-location").value,
-        price: document.getElementById("wh-add-price-in").value || 0,
-        unit: "Cái",
+        mfg_date: document.getElementById("wh-add-mfg-date").value,
+        exp_date: document.getElementById("wh-add-exp-date").value,
+        price_in: document.getElementById("wh-add-price-in").value || 0,
+        price_out: document.getElementById("wh-add-price-out").value || 0,
         description: document.getElementById("wh-add-note").value,
+        image_url: finalImageUrl, // Gửi link ảnh Cloudinary đi
       };
 
-      fetch("api/add_product.php", {
+      fetch("api/api_products.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(productData),
       })
-        .then((res) => res.text())
-        .then((text) => {
-          try {
-            const response = JSON.parse(text.trim());
+        .then((res) => res.json())
+        .then((response) => {
+          if (response.status === "success") {
+            btnSubmit.innerHTML = '<i class="fas fa-check me-2"></i> Đã xong!';
+            btnSubmit.classList.replace("btn-primary", "btn-success");
 
-            if (response.status === "success") {
-              btnSubmit.innerHTML = '<i class="fas fa-check me-2"></i> Đã xong!';
-              btnSubmit.classList.replace("btn-primary", "btn-success");
+            const modalInstance = bootstrap.Modal.getInstance(whModal);
+            if (modalInstance) modalInstance.hide();
 
-              setTimeout(() => {
-                Swal.fire({
-                  icon: "success",
-                  title: "Nhập kho thành công!",
-                  text: "Sản phẩm đã được cập nhật vào hệ thống Aiven.",
-                  timer: 2000,
-                  showConfirmButton: false,
-                });
-
-                const modalInstance = bootstrap.Modal.getInstance(whModal);
-                if (modalInstance) modalInstance.hide();
-                location.reload();
-              }, 800);
-            } else {
-              btnSubmit.innerHTML = originalText;
-              btnSubmit.disabled = false;
-              Swal.fire("Lỗi!", response.message, "error");
-            }
-          } catch (jsonErr) {
-            if (text.includes("success") || text.trim() === "") {
-              btnSubmit.innerHTML = '<i class="fas fa-check me-2"></i> Đã xong!';
-              btnSubmit.classList.replace("btn-primary", "btn-success");
-
-              setTimeout(() => {
-                Swal.fire({
-                  icon: "success",
-                  title: "Nhập kho thành công!",
-                  text: "Sản phẩm đã được cập nhật vào hệ thống Aiven.",
-                  timer: 2000,
-                  showConfirmButton: false,
-                });
-
-                const modalInstance = bootstrap.Modal.getInstance(whModal);
-                if (modalInstance) modalInstance.hide();
-                location.reload();
-              }, 800);
-            } else {
-              btnSubmit.innerHTML = originalText;
-              btnSubmit.disabled = false;
-              Swal.fire("Lỗi xử lý!", "Phản hồi máy chủ lỗi cấu trúc.", "error");
-            }
+            Swal.fire({
+              icon: "success",
+              title: "Nhập kho thành công!",
+              text: "Sản phẩm đã được cập nhật.",
+              confirmButtonText: "Tuyệt vời",
+              confirmButtonColor: "#4361ee",
+            }).then(() => {
+              location.reload();
+            });
+          } else {
+            btnSubmit.innerHTML = originalText;
+            btnSubmit.disabled = false;
+            Swal.fire("Lỗi!", response.message, "error");
           }
         })
         .catch((err) => {

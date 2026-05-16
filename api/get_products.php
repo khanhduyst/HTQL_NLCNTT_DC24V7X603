@@ -1,9 +1,7 @@
 <?php
-// api/get_products.php
 header("Content-Type: application/json; charset=UTF-8");
 session_start();
 
-// Kiểm tra quyền đăng nhập
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(["status" => "error", "message" => "Chặn truy cập hợp lệ!"]);
     exit();
@@ -14,13 +12,13 @@ require_once '../config/Database.php';
 $database = new Database();
 $db = $database->getConnection();
 
-// Dùng INNER JOIN để lấy cột category_name từ bảng categories thông qua category_id
 $query = "SELECT 
             p.sku, 
             p.product_name AS name, 
             c.category_name AS cat, 
             p.price, 
-            p.stock_quantity AS stock
+            p.stock_quantity AS stock,
+            p.image_url
           FROM products p
           INNER JOIN categories c ON p.category_id = c.id
           ORDER BY p.id DESC";
@@ -32,7 +30,6 @@ try {
     $products_arr = [];
 
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        // Tự động tính toán status và label dựa trên dữ liệu tồn kho thật (stock_quantity)
         $stockInt = (int)$row['stock'];
         $status = "ok";
         $label = "Còn hàng";
@@ -45,9 +42,8 @@ try {
             $label = "Sắp hết hàng";
         }
 
-        // Định nghĩa các icon và màu sắc động theo Danh mục dựa trên giao diện của em
         $icon = "📦";
-        $color = "#7c3aed"; // Màu mặc định (Phụ kiện / Khác)
+        $color = "#7c3aed";
         
         if ($row['cat'] === 'Laptop') {
             $icon = "💻";
@@ -64,12 +60,13 @@ try {
             "sku" => $row['sku'],
             "name" => $row['name'],
             "cat" => $row['cat'],
-            "price" => number_format($row['price'], 0, ',', '.'), // Đổi từ decimal 45000000.00 sang chuỗi hiển thị "45.000.000"
+            "price" => number_format($row['price'], 0, ',', '.'),
             "stock" => $stockInt,
             "status" => $status,
             "label" => $label,
             "icon" => $icon,
-            "color" => $color
+            "color" => $color,
+            "image_url" => $row['image_url']
         ];
 
         array_push($products_arr, $product_item);
