@@ -14,10 +14,10 @@ if (!isset($_SESSION['user_id'])) {
             <p class="wh-subtitle text-muted mb-0">Theo dõi tồn kho và luân chuyển hàng hóa</p>
         </div>
         <div class="wh-actions">
-            <button class="btn btn-outline-secondary wh-btn-export me-2">
+            <button class="btn btn-outline-secondary wh-btn-export me-2" id="btn-wh-export-excel">
                 <i class="fas fa-file-excel me-1"></i> Xuất file
             </button>
-            <button class="btn btn-primary wh-btn-add" data-bs-toggle="modal" data-bs-target="#modalAddWarehouse">
+            <button class="btn btn-primary wh-btn-add" onclick="clearWarehouseFormForNew()">
                 <i class="fas fa-plus me-1"></i> Nhập hàng mới
             </button>
         </div>
@@ -45,8 +45,8 @@ if (!isset($_SESSION['user_id'])) {
                 <div class="col-md-3 col-6">
                     <select id="wh-status-filter" class="form-select border-0 bg-light shadow-none">
                         <option value="">Tất cả trạng thái</option>
-                        <option value="ok">Còn hàng</option>
-                        <option value="low">Sắp hết hàng</option>
+                        <option value="instock">Còn hàng</option>
+                        <option value="low">Sắp hết</option>
                         <option value="out">Hết hàng</option>
                     </select>
                 </div>
